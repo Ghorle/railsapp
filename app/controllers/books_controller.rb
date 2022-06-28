@@ -1,7 +1,7 @@
 class BooksController < ApplicationController
   before_action :set_book, only: %i[ show edit update destroy ]
   before_action :authenticate_user!, except: [:index, :show]
-  before_action :current_user, only: [:edit, :update, :destroy]
+  before_action :correct_user, only: [:edit, :update, :destroy]
   # GET /books or /books.json
   def index
     @books = Book.all
@@ -13,7 +13,7 @@ class BooksController < ApplicationController
 
   # GET /books/new
   def new
-    @book = Book.new
+    @book = current_user.books.build
   end
 
   # GET /books/1/edit
@@ -22,7 +22,7 @@ class BooksController < ApplicationController
 
   # POST /books or /books.json
   def create
-    @book = Book.new(book_params)
+    @book = current_user.books.build(book_params)
 
     respond_to do |format|
       if @book.save
@@ -58,7 +58,7 @@ class BooksController < ApplicationController
     end
   end
 
-  def current_user
+  def correct_user
     @book = current_user.books.find_by(id: params[:id])
     redirect_to books_path, notice: "Not Authorized" if @book.nil?
   end
